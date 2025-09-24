@@ -1,0 +1,51 @@
+#!/bin/bash
+
+# Check if correct number of arguments provided
+if [ $# -lt 2 ] || [ $# -gt 4 ]; then
+    echo "Usage: $0 <dataset_name> <model_name> [--prior] [--supervised]"
+    echo "Available datasets: stephenson, combat, onek1k, hlca"
+    echo "Available models: tiny, middle, large"
+    echo "Optional flags: --prior, --supervised"
+    exit 1
+fi
+
+DATASET_NAME=$1
+MODEL_NAME=$2
+PRIOR_FLAG=""
+SUPERVISED_FLAG=""
+
+# Parse optional flags
+for arg in "${@:3}"; do
+    case $arg in
+        --prior)
+            PRIOR_FLAG="--prior"
+            ;;
+        --supervised)
+            SUPERVISED_FLAG="--supervised"
+            ;;
+        *)
+            echo "Unknown flag: $arg"
+            exit 1
+            ;;
+    esac
+done
+
+echo "Running benchmark with dataset: $DATASET_NAME, model: $MODEL_NAME"
+echo "Flags: $PRIOR_FLAG $SUPERVISED_FLAG"
+
+# Source conda and activate environment
+source ./miniconda3/etc/profile.d/conda.sh
+conda activate sampleclr311
+
+echo "Current conda environment: $CONDA_DEFAULT_ENV"
+echo "Python path: $(which python)"
+
+# Change to the SampleCLR project directory
+
+# Run the benchmark script
+python experiments/spare_benchmark.py \
+    --dataset-config configs/datasets/${DATASET_NAME}.json \
+    --model-config configs/models/${MODEL_NAME}.json \
+    --output-dir results \
+    $PRIOR_FLAG \
+    $SUPERVISED_FLAG
