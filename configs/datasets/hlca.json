@@ -1,0 +1,43 @@
+{
+    "dataset_name": "hlca",
+    "data_path": "hlca_processed.h5ad",
+    "metadata_path": "hlca_metadata.csv",
+    "sample_id_col": "donor_id",
+    "layer": "X_scVI_batch",
+    "batch_size": 32,
+    "prior_sample_distances": "gloscope_representation",
+    "n_cells_per_sample": [500, 1000],
+    "min_cells": 800,
+    "supervised_task": {"classification": ["lung_condition"]},
+    "batch_variable": "suspension_type",
+    "benchmark_schema": {
+        "relevant": {
+            "tissue": "classification",
+            "anatomical_region_ccf_score": "regression",
+            "lung_condition": "classification",
+            "disease": "classification",
+            "smoking_status": "classification"
+        },
+        "technical": {
+            "suspension_type": "classification",
+            "core_or_extension": "classification",
+            "fresh_or_frozen": "classification",
+            "sequencing_platform": "classification",
+            "subject_type": "classification",
+            "assay": "classification",
+            "median_n_genes_by_counts": "regression",
+            "median_total_counts": "regression",
+            "median_pct_counts_mt": "regression", 
+            "n_cells": "regression"
+        },
+        "contextual": {
+            "BMI": "regression", 
+            "age_or_mean_of_age_range": "regression",
+            "sex": "classification",
+            "self_reported_ethnicity": "classification"
+        }
+    },
+    "trajectory_variable": "anatomical_region_ccf_score",
+    "inverse_trajectory": false,
+    "root_sample": "homosapiens_None_2023_None_sikkemalisa_002_d10_1101_2022_03_10_483747D322"
+}

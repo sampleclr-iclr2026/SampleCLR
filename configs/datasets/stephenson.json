@@ -1,0 +1,39 @@
+{
+    "dataset_name": "stephenson",
+    "data_path": "stephenson_processed.h5ad",
+    "metadata_path": "stephenson_metadata.csv",
+    "sample_id_col": "sample_id",
+    "layer": "X_scANVI_batch",
+    "batch_size": 32,
+    "prior_sample_distances": "gloscope_representation",
+    "n_cells_per_sample": 1000,
+    "min_cells": 1100,
+    "supervised_task": {"classification": ["Status"]},
+    "batch_variable": "Site",
+    "benchmark_schema": {
+        "relevant": {
+            "Status": "classification",
+            "Status_on_day_collection_summary": "classification",
+            "Days_from_onset": "regression",
+            "Worst_Clinical_Status": "classification",
+            "Outcome": "classification",
+            "disease": "classification"
+        },
+        "technical": {
+            "Site": "classification",
+            "median_n_genes_by_counts": "regression",
+            "median_total_counts": "regression",
+            "median_pct_counts_mt": "regression",
+            "n_cells": "regression"
+        },
+        "contextual": {
+            "Swab_result": "classification", 
+            "Smoker": "classification",
+            "sex": "classification",
+            "development_stage": "regression"
+        }
+    },
+    "trajectory_variable": "Worst_Clinical_Status",
+    "inverse_trajectory": false,
+    "root_sample": "MH8919179"
+}

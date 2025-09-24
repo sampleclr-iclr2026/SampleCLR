@@ -1,0 +1,24 @@
+name: rapids_singlecell
+channels:
+  - rapidsai
+  - nvidia
+  - conda-forge
+  - bioconda
+dependencies:
+  - python=3.11
+  - anndata=0.11
+  - scanpy=1.11
+  - leidenalg
+  - louvain
+  - zarr
+  - cuda-version=12
+  - rapids=24.06
+  - scipy<1.15
+  - dask
+  - dask-ml
+  - sparse
+  - harmonypy
+  - pytorch
+  - pip
+  - pip:
+    - rapids-singlecell

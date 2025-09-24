@@ -1,0 +1,31 @@
+{
+    "dataset_name": "onek1k",
+    "data_path": "onek1k_processed.h5ad",
+    "metadata_path": "onek1k_metadata.csv",
+    "sample_id_col": "donor_id",
+    "layer": "X_scANVI_batch",
+    "batch_size": 48,
+    "prior_sample_distances": "gloscope_representation",
+    "n_cells_per_sample": [700, 1000],
+    "min_cells": 1000,
+    "supervised_task": {"regression": ["age"]},
+    "batch_variable": "pool_number",
+    "benchmark_schema": {
+        "relevant": {
+            "age": "regression"
+        },
+        "technical": {
+            "pool_number": "classification", 
+            "median_n_genes_by_counts": "regression",
+            "median_total_counts": "regression", 
+            "median_pct_counts_mt": "regression", 
+            "n_cells": "regression"
+        },
+        "contextual": {
+            "sex": "classification"
+        }
+    },
+    "trajectory_variable": "age",
+    "inverse_trajectory": false,
+    "root_sample": "177_178"
+}

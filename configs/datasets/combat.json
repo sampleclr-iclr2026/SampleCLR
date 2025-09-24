@@ -1,0 +1,45 @@
+{
+    "dataset_name": "combat",
+    "data_path": "combat_processed.h5ad",
+    "metadata_path": "combat_metadata.csv",
+    "sample_id_col": "scRNASeq_sample_ID",
+    "layer": "X_scVI_batch",
+    "batch_size": 32,
+    "prior_sample_distances": "gloscope_representation",
+    "n_cells_per_sample": [1000, 2000],
+    "min_cells": 1500,
+    "supervised_task": {"ordinal_regression": ["Outcome"]},
+    "batch_variable": "Institute",
+    "benchmark_schema": {
+        "relevant": {
+            "Source": "classification",
+            "Outcome": "ranking",
+            "Death28": "classification", 
+            "Hospitalstay": "regression", 
+            "TimeSinceOnset": "regression"
+        },
+        "technical": {
+            "Institute": "classification", 
+            "Pool_ID": "classification", 
+            "median_n_genes_by_counts": "regression", 
+            "median_total_counts": "regression", 
+            "median_pct_counts_mt": "regression", 
+            "n_cells": "regression"
+        },
+        "contextual": {
+            "Age": "regression", 
+            "Sex": "classification", 
+            "BMI": "regression", 
+            "PreExistingHeartDisease": "classification", 
+            "PreExistingLungDisease": "classification", 
+            "PreExistingDiabetes": "classification", 
+            "PreExistingHypertension": "classification",  
+            "Smoking": "classification",
+            "Requiredvasoactive": "classification", 
+            "SARSCoV2PCR": "classification"
+        }
+    },
+    "trajectory_variable": "Outcome",
+    "inverse_trajectory": true,
+    "root_sample": "H00052-Ha001E-PBGa"
+}
