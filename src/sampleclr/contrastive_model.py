@@ -455,25 +455,141 @@ class ContrastiveModel:
         sample_similarity_graph: pd.DataFrame | None = None,
     ):
         """
-        Initializes the ContrastiveModel with data, tasks, hyperparameters, and optional splits.
+        Initializes the ContrastiveModel with data, task definitions, hyperparameters, and optional dataset splits.
 
         Args:
-            adata: AnnData object containing the dataset.
-            sample_key: Column in adata.obs indicating sample IDs.
-            tasks: Dictionary specifying tasks. Example:
-                   {
-                       'classification': ['Sex'],
-                       'regression': ['Age'],
-                       'ordinal_regression': ['Outcome'],
-                       'batch_correction': 'Pool_ID'
-                   }
-            layer: The obsm layer to use.
-            device: 'cpu' or 'cuda'.
-            split_config: Dict with 'split_by','shared_cov','val_frac','test_frac' for dataset splitting.
-            extra_covariates: Additional classification covariates for evaluation.
-            num_layers,hidden_size,...: model/training hyperparams
-            early_stopping_patience: How many epochs to wait before stopping if val loss does not improve.
+            adata:
+                AnnData object containing the dataset.
+            sample_key:
+                Column in `adata.obs` with sample identifiers (used to group cells into samples).
+
+            tasks:
+                Dictionary specifying supervised objectives. Example:
+                    {
+                        'classification': ['Sex'],
+                        'regression': ['Age'],
+                        'ordinal_regression': ['Outcome'],
+                        'batch_correction': 'Pool_ID'
+                    }
+                Each key activates a corresponding head; values list target columns in `adata.obs`. For
+                `batch_correction`, pass a single categorical column to enable the adversarial discriminator.
+
+            layer:
+                Feature source to use as input (e.g., '.obsm' key like "X_pca" or a layer name).
+            device:
+                'cpu' or 'cuda'. If None, inferred automatically.
+            extra_covariates:
+                Optional list of additional covariates for evaluation/stratification.
+
+            num_layers:
+                Number of hidden layers in the feature encoder.
+            hidden_size:
+                Width of hidden layers in the feature encoder.
+            learning_rate_feature:
+                Learning rate for the feature/encoder/aggregator parameters.
+            learning_rate_discriminator:
+                Learning rate for the adversarial discriminator (batch correction).
+            weight_decay:
+                Weight decay (L2) applied to optimizers.
+            batch_size:
+                Mini-batch size (in samples).
+
+            n_aggregator_heads:
+                Number of heads in the multi-head cell-to-sample aggregation module.
+            aggregator_num_layers:
+                Number of hidden layers in the aggregator network.
+            aggregator_hidden_size:
+                Hidden size of aggregator layers.
+            aggregator_normalization:
+                Normalization in aggregator blocks (e.g., 'BatchNorm', 'LayerNorm', or None).
+            aggregator_activation:
+                Activation used inside the aggregator (e.g., 'relu', 'sigmoid').
+            aggregator_pruning_threshold:
+                Optional pruning threshold for attention/importance scores (None disables pruning).
+
+            output_dim:
+                Dimensionality of the final sample embedding.
+            lambda_:
+                Weight for supervised objectives relative to contrastive loss (higher = more supervised).
+            n_cells_per_sample:
+                Number of cells to sample from each sample  per batch or a range of minimum and maximum number of cells.
+
+            num_epochs_stage1:
+                Number of epochs for stage 1 training (contrastive).
+            num_epochs_stage2:
+                Number of epochs for stage 2 training (e.g., contrastive and supervised fine-tuning).
+            num_warmup_epochs_stage1:
+                Warm-up epochs for stage 1.
+            num_warmup_epochs_stage2:
+                Warm-up epochs for stage 2.
+            verbose:
+                If True, print detailed training progress.
+            early_stopping_patience:
+                Stop if validation metric does not improve for this many epochs.
+
+            classifier_num_layers:
+                Number of hidden layers in each classification head.
+            classifier_hidden_size:
+                Hidden size for classification heads.
+            regression_num_layers:
+                Number of hidden layers in each regression head.
+            regression_hidden_size:
+                Hidden size for regression heads.
+            ordinal_num_layers:
+                Number of hidden layers in each ordinal-regression head.
+            ordinal_hidden_size:
+                Hidden size for ordinal-regression heads.
+            use_normalization:
+                If True, apply feature normalization in heads/encoder where supported.
+
+            train_ids:
+                Optional iterable of sample IDs to force into the training split, if none it uses all samples.
+            val_ids:
+                Optional iterable of sample IDs to force into the validation split.
+            test_ids:
+                Optional iterable of sample IDs to force into the test split.
+
+            diversity_loss_weight:
+                Weight for the (optional) diversity/entropy regularizer across aggregator heads.
+            use_gumbel:
+                If True, use Gumbel-Softmax sampling for discrete attention/selection in the aggregator.
+            diversity_loss_temperature:
+                Temperature for diversity regularizer (higher = smoother distribution).
+            discriminator_toggle_threshold:
+                Threshold to (auto)toggle adversarial discriminator updates (e.g., based on loss ratio).
+            discriminator_num_layers:
+                Number of hidden layers in the adversarial discriminator.
+            discriminator_hidden_size:
+                Hidden size of the adversarial discriminator.
+
+            feature_normalization:
+                Normalization in the encoder/feature blocks (e.g., 'BatchNorm', 'LayerNorm').
+            contrastive_loss:
+                Contrastive objective name (e.g., 'InfoNCECosine', 'InfoNCEGaussian', 'InfoNCECauchy',
+                'InfoNCEBatchAware', 'XSampleCLR', etc.). Must match implemented losses.
+                'XSampleCLR' is suggested upon having good prior sample graph.
+            contrastive_loss_temperature:
+                Temperature (τ) for predictions in contrastive loss (lower = sharper similarities).
+            xsample_clr_graph_temperature:
+                Temperature for targets (the teacher) in graph-aware XSampleCLR variant (used with sample-graph augmentation).
+
+            cell_weights_col:
+                Optional `adata.obs` column with non-negative weights per cell (sampling/weighting).
+            sample_similarity_graph:
+                Optional precomputed sample-by-sample similarity (square pandas.DataFrame with index/columns
+                equal to sample IDs). Used by graph-aware contrastive loss 'XSampleCLR'.
+
+        Notes:
+            - The model jointly learns sample embeddings (contrastive) and optional supervised heads
+              (classification, regression, ordinal), with optional batch-effect correction via an adversarial
+              discriminator when `tasks['batch_correction']` is provided.
+            - Two-stage training is supported via the stage1/stage2 epoch and warm-up knobs.
+            - Provide `train_ids` / `val_ids` to use early stopping.
+
+        Returns:
+            None. Initializes data, networks, and optimizers, and prepares encoders as needed.
         """
+
         # self.adata = adata.copy()
         self.adata = adata
         self.sample_key = sample_key
