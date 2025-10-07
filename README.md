@@ -134,6 +134,22 @@ best_state, best_val, e1, e2 = model.train(
     verbose=False,
 )
 
+# Simple KNN/NN Evaluation, you can evaluate on more targets if you specify extra_covariates list parameter when constructing the model, otherwise evaluation is done based on the given covariate in given tasks when running supervised version.
+
+results = {}
+results["train"] = model.evaluate_split(
+    model.train_dataset,
+    model.metadata_all.loc[model.train_dataset.unique_categories],
+    model.train_dataset,
+    model.metadata_all.loc[model.train_dataset.unique_categories]
+) if model.train_dataset is not None else {}
+results["val"] = model.evaluate_split(
+    model.train_dataset,
+    model.metadata_all.loc[model.train_dataset.unique_categories],
+    model.val_dataset,
+    model.metadata_all.loc[model.val_dataset.unique_categories]
+) if model.val_dataset is not None else {}
+
 # 7) getting embeddings
 
 #give it any dataset split you want to get embeddings for by creating a dataset object like following: below the "ds_all" is the same as model.train_dataset since we are using all sample for training in this example.
@@ -151,25 +167,7 @@ ds_all = SamplesDataset(
     layer=model.layer,
 )
 
-# Simple KNN/NN Evaluation, you can evaluate on more targets if you specify extra_covariates list parameter when constructing the model, otherwise evaluation is done based on the given covariate in given tasks when running supervised version.
-
-results = {}
-results["train"] = model.evaluate_split(
-    model.train_dataset,
-    model.metadata_all.loc[model.train_dataset.unique_categories],
-    model.train_dataset,
-    model.metadata_all.loc[model.train_dataset.unique_categories]
-) if model.train_dataset is not None else {}
-results["val"] = model.evaluate_split(
-    model.train_dataset,
-    model.metadata_all.loc[model.train_dataset.unique_categories],
-    model.val_dataset,
-    model.metadata_all.loc[model.val_dataset.unique_categories]
-) if model.val_dataset is not None else {}
-
-
-# 8)
-reps = get_sample_representations(model.projector, model.aggregator, ds_all, device=model.device) 
+representations = get_sample_representations(model.projector, model.aggregator, ds_all, device=model.device) 
 
 
 
