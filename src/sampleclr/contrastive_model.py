@@ -442,7 +442,7 @@ class ContrastiveModel:
         val_ids=None,       
         test_ids=None,
         diversity_loss_weight=1.0,
-        use_gumbel= True,
+        use_gumbel= False,
         diversity_loss_temperature = 1.0,
         discriminator_toggle_threshold = 0.5,
         discriminator_num_layers = 1 ,
